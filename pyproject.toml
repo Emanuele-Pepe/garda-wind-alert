@@ -1,0 +1,33 @@
+[project]
+name = "garda-wind-alert"
+version = "0.1.0"
+description = "Daily email alert when Lake Garda wind (Peler / Ora) forecast looks sailable."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+garda-wind-alert = "garda_wind_alert.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

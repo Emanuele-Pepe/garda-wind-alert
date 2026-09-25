@@ -1,0 +1,30 @@
+# Spots and thresholds. Starting guesses: calibrate after a week of real sessions.
+# Directions are where the wind comes FROM, in degrees (0 = N, 180 = S).
+# Hours are local time (Europe/Rome), start inclusive, end exclusive.
+
+days_ahead: [1, 2]        # tomorrow and the day after
+model: best_match         # Open-Meteo model; see README "Known limits"
+data_path: data/forecasts.csv
+
+spots:
+  - name: Malcesine
+    wind_name: Peler
+    latitude: 45.764
+    longitude: 10.809
+    start_hour: 5
+    end_hour: 11
+    dir_from: 330         # N sector, wraps around 0
+    dir_to: 30
+    min_speed_kn: 14      # Fanatic Skate 92 needs it strong
+    min_hours: 2
+
+  - name: Torbole
+    wind_name: Ora
+    latitude: 45.871
+    longitude: 10.874
+    start_hour: 12
+    end_hour: 19
+    dir_from: 160         # S / SSW sector
+    dir_to: 230
+    min_speed_kn: 12      # Speedster 118 + Matrix 7.2
+    min_hours: 2
