@@ -16,6 +16,10 @@ def test_direction_simple_range(deg, expected):
     assert direction_in_range(deg, 160, 230) is expected
 
 
+def test_direction_360_equals_north():
+    assert direction_in_range(360, 0, 30) is True
+
+
 @pytest.mark.parametrize(
     ("deg", "expected"),
     [

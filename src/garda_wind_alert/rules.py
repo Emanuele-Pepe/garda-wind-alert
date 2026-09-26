@@ -20,7 +20,12 @@ class DayVerdict:
 
 def direction_in_range(deg: float, dir_from: float, dir_to: float) -> bool:
     """True if deg is inside [dir_from, dir_to], handling wrap-around (e.g. 330 -> 30)."""
-    raise NotImplementedError
+    deg = deg % 360
+
+    if dir_from <= dir_to:
+        return dir_from <= deg <= dir_to
+    else:
+        return deg >= dir_from or deg <= dir_to
 
 
 def evaluate_day(points: list[HourlyPoint], spot: Spot, day: date) -> DayVerdict:
