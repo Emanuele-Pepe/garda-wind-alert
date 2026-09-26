@@ -33,4 +33,30 @@ def evaluate_day(points: list[HourlyPoint], spot: Spot, day: date) -> DayVerdict
 
     go = good_hours >= spot.min_hours.
     """
-    raise NotImplementedError
+    # 1. points on the right day, inside the time window
+    window = [
+        p for p in points if p.time.date() == day and spot.start_hour <= p.time.hour < spot.end_hour
+    ]
+
+    # 2. hours with the right direction AND enough speed
+    good = [
+        p
+        for p in window
+        if direction_in_range(p.direction_deg, spot.dir_from, spot.dir_to)
+        and p.speed_kn >= spot.min_speed_kn
+    ]
+
+    # 3. maxima over the whole window, 0 if the window is empty
+    max_speed = max((p.speed_kn for p in window), default=0)
+    max_gust = max((p.gust_kn for p in window), default=0)
+
+    # 4. build the verdict
+    return DayVerdict(
+        spot=spot.name,
+        wind_name=spot.wind_name,
+        day=day,
+        go=len(good) >= spot.min_hours,
+        good_hours=len(good),
+        max_speed_kn=max_speed,
+        max_gust_kn=max_gust,
+    )
