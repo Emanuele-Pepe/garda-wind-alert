@@ -43,6 +43,7 @@ def parse_hourly(payload: dict) -> list[HourlyPoint]:
         hourly["wind_speed_10m"],
         hourly["wind_gusts_10m"],
         hourly["wind_direction_10m"],
+        strict=True,
     ):
         if speed is None or gust is None or direction is None:
             continue

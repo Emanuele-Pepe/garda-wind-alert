@@ -27,6 +27,7 @@ def test_parse_hourly_empty():
     }
     assert parse_hourly(empty) == []
 
+
 def test_parse_hourly_skips_null_direction():
     payload = {
         "hourly": {
