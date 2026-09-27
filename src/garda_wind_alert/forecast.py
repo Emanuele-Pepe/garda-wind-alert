@@ -36,4 +36,22 @@ def fetch_raw(spot: Spot, model: str, forecast_days: int, timeout: float = 20) -
 
 def parse_hourly(payload: dict) -> list[HourlyPoint]:
     """Turn the payload into HourlyPoints, skipping hours with any null value."""
-    raise NotImplementedError
+    hourly = payload["hourly"]
+    points = []
+    for t, speed, gust, direction in zip(
+        hourly["time"],
+        hourly["wind_speed_10m"],
+        hourly["wind_gusts_10m"],
+        hourly["wind_direction_10m"],
+    ):
+        if speed is None or gust is None or direction is None:
+            continue
+        points.append(
+            HourlyPoint(
+                time=datetime.fromisoformat(t),
+                speed_kn=speed,
+                gust_kn=gust,
+                direction_deg=direction,
+            )
+        )
+    return points

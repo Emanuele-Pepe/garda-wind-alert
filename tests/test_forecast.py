@@ -26,3 +26,16 @@ def test_parse_hourly_empty():
         "hourly": {"time": [], "wind_speed_10m": [], "wind_gusts_10m": [], "wind_direction_10m": []}
     }
     assert parse_hourly(empty) == []
+
+def test_parse_hourly_skips_null_direction():
+    payload = {
+        "hourly": {
+            "time": ["2026-09-27T13:00", "2026-09-27T14:00"],
+            "wind_speed_10m": [12.0, 13.0],
+            "wind_gusts_10m": [18.0, 19.0],
+            "wind_direction_10m": [None, 200],
+        }
+    }
+    points = parse_hourly(payload)
+    assert len(points) == 1
+    assert points[0].direction_deg == 200
