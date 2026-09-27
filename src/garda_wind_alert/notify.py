@@ -4,13 +4,22 @@ from garda_wind_alert.rules import DayVerdict
 
 
 def format_report(verdicts: list[DayVerdict]) -> tuple[str, str]:
-    """Return (subject, body).
+    go = [v for v in verdicts if v.go]
 
-    Subject lists the GO days, e.g. "GO: Torbole Ora sat 27/09"
-    or "No wind: next 2 days" when nothing qualifies.
-    Body: one line per verdict with good hours, max speed and max gust.
-    """
-    raise NotImplementedError
+    if go:
+        labels = [f"{v.spot} {v.wind_name} {v.day:%a %d/%m}" for v in go]
+        subject = "GO: " + ", ".join(labels)
+    else:
+        n_days = len({v.day for v in verdicts})
+        subject = f"No wind: next {n_days} days"
+
+    lines = [
+        f"{'✅' if v.go else '❌'} {v.day:%a %d/%m}  {v.spot} ({v.wind_name}): "
+        f"{v.good_hours} good h, max {v.max_speed_kn:.0f} kn, gust {v.max_gust_kn:.0f} kn"
+        for v in verdicts
+    ]
+    body = "\n".join(lines)
+    return subject, body
 
 
 def send_email(subject: str, body: str) -> None:
