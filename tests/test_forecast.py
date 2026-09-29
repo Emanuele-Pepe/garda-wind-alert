@@ -1,6 +1,10 @@
 from datetime import datetime
 
-from garda_wind_alert.forecast import parse_hourly
+import pytest
+import requests
+
+from garda_wind_alert import forecast
+from garda_wind_alert.forecast import fetch_raw, parse_hourly
 
 PAYLOAD = {
     "hourly": {
@@ -40,3 +44,47 @@ def test_parse_hourly_skips_null_direction():
     points = parse_hourly(payload)
     assert len(points) == 1
     assert points[0].direction_deg == 200
+
+
+class FakeResponse:
+    """Stands in for requests.Response: only the two methods fetch_raw uses."""
+
+    def __init__(self, payload: dict, status: int = 200):
+        self.payload = payload
+        self.status = status
+
+    def raise_for_status(self) -> None:
+        if self.status >= 400:
+            raise requests.HTTPError(f"HTTP {self.status}")
+
+    def json(self) -> dict:
+        return self.payload
+
+
+def test_fetch_raw_sends_expected_params(monkeypatch, ora_spot):
+    calls = {}
+
+    def fake_get(url, params, timeout):
+        calls.update(url=url, params=params, timeout=timeout)
+        return FakeResponse({"hourly": {}})
+
+    monkeypatch.setattr(forecast.requests, "get", fake_get)
+
+    result = fetch_raw(ora_spot, "best_match", 3)
+
+    assert result == {"hourly": {}}
+    assert calls["params"]["latitude"] == ora_spot.latitude
+    assert calls["params"]["wind_speed_unit"] == "kn"
+    assert calls["params"]["timezone"] == "Europe/Rome"
+    assert calls["params"]["forecast_days"] == 3
+    assert calls["timeout"] > 0
+
+
+def test_fetch_raw_raises_on_http_error(monkeypatch, ora_spot):
+    def fake_get(url, params, timeout):
+        return FakeResponse({}, status=500)
+
+    monkeypatch.setattr(forecast.requests, "get", fake_get)
+
+    with pytest.raises(requests.HTTPError):
+        fetch_raw(ora_spot, "best_match", 3)

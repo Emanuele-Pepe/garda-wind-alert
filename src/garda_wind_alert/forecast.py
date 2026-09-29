@@ -16,6 +16,8 @@ Values can be null.
 from dataclasses import dataclass
 from datetime import datetime
 
+import requests
+
 from garda_wind_alert.config import Spot
 
 API_URL = "https://api.open-meteo.com/v1/forecast"
@@ -31,7 +33,18 @@ class HourlyPoint:
 
 def fetch_raw(spot: Spot, model: str, forecast_days: int, timeout: float = 20) -> dict:
     """Call the API and return the JSON payload. Raise on HTTP errors."""
-    raise NotImplementedError
+    params = {
+        "latitude": spot.latitude,
+        "longitude": spot.longitude,
+        "hourly": "wind_speed_10m,wind_gusts_10m,wind_direction_10m",
+        "wind_speed_unit": "kn",
+        "timezone": "Europe/Rome",
+        "forecast_days": forecast_days,
+        "models": model,
+    }
+    response = requests.get(API_URL, params=params, timeout=timeout)
+    response.raise_for_status()
+    return response.json()
 
 
 def parse_hourly(payload: dict) -> list[HourlyPoint]:
