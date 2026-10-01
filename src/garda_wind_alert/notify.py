@@ -1,5 +1,9 @@
 """Build the report and send it by email (Gmail SMTP with an app password)."""
 
+import os
+import smtplib
+from email.message import EmailMessage
+
 from garda_wind_alert.rules import DayVerdict
 
 
@@ -24,5 +28,19 @@ def format_report(verdicts: list[DayVerdict]) -> tuple[str, str]:
 
 def send_email(subject: str, body: str) -> None:
     """Send via SMTP_SSL. Read SMTP_HOST (default smtp.gmail.com), SMTP_PORT (default 465),
-    SMTP_USER, SMTP_PASSWORD, ALERT_TO from environment variables. Never hardcode secrets."""
-    raise NotImplementedError
+    SMTP_USER, SMTP_PASSWORD, ALERT_TO from environment variables."""
+    host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    port = int(os.environ.get("SMTP_PORT", "465"))
+    user = os.environ["SMTP_USER"]
+    password = os.environ["SMTP_PASSWORD"]
+    to = os.environ["ALERT_TO"]
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = user
+    msg["To"] = to
+    msg.set_content(body)
+
+    with smtplib.SMTP_SSL(host, port, timeout=30) as server:
+        server.login(user, password)
+        server.send_message(msg)
